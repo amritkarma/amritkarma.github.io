@@ -5,11 +5,11 @@
         <script type="text/javascript" src="javascripts/osmbuildings.debug.v0.1.8.js"></script>
         <!-- // <script type="text/javascript" src="../OpenLayers-2.12/addins/osmbuildings.debug.v0.1.9.js"></script> -->
         <script type="text/javascript">
-            var lat=27.7021421;
+            var lat=27.70771;
             // var lat=52.49480;
-            var lon=85.3195923;
+            var lon=85.33576;
             // var lon=13.42857;
-            var zoom=17;
+            var zoom=16;
             var map;
             var layer;
             var geojson_format = new OpenLayers.Format.GeoJSON();
@@ -1317,8 +1317,8 @@
                 } 
                 selector = new OpenLayers.Control.SelectFeature(layer1,{
                   onSelect: onFeatureSelect,
-                  // onUnselect: onFeatureUnselect
-                  //,hover: true
+                  onUnselect: function(){selector.unselectAll();}
+                  // hover: true
                 });
                 map.addControl(selector);
                 
