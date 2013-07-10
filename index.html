@@ -9,7 +9,7 @@
             // var lat=52.49480;
             var lon=85.33576;
             // var lon=13.42857;
-            var zoom=16;
+            var zoom=17;
             var map;
             var layer;
             var geojson_format = new OpenLayers.Format.GeoJSON();
@@ -1263,7 +1263,7 @@
                 layer2 = new OpenLayers.Layer.Buildings();
                 map.addLayer(layer2);
                 layer2.osmb.geoJSON(qjson);
-                layer2.osmb.setStyle({ color: 'rgb(255,100,100)' ,roofColor:'rgba(255,200,100,0.9)'});
+                layer2.osmb.setStyle({ color: 'rgb(255,100,100)' ,roofColor:'rgb(100,100,100)'});
 
 
                 //controls   
