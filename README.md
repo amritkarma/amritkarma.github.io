@@ -10,8 +10,11 @@ osmbuildings.org:
 		accepted solution:
 			overpass ide converts data into geojson client side (look at the code)
 				osmbuildings requires either z-coordinate or height property, overpass-ide does not give these. need to configure them.
-				progress: openlayers can make ajax calls to overpass and store them as features
-				todo: convert those features to be used by 3dbuildings
+				progress: openlayers can make ajax calls to overpass and store them as features.
+					used layer addedfeature event to make geojson for osmbuilding. 
+				todo: convert those features to be used by 3dbuildings.
+					need to overwrite write function() to append height property to geojson
+
 
 			offline process:
 				use overpass ide to select data
