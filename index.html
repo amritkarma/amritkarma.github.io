@@ -15,6 +15,32 @@
             var geojson_format = new OpenLayers.Format.GeoJSON();
             proj900913 = new OpenLayers.Projection("EPSG:900913");
             proj4326 = new OpenLayers.Projection("EPSG:4326");
+
+            var field = [
+          {key:"building",alias:"Building",value:["N/A","kindergarten","school","college","university","hospital","clinic","nursing_home","health_post"]},
+          
+          {key:"building_3",alias:"Owner",value:["N/A","Self","Rent"]},
+          
+          {key:"building_a",alias:"Estimated Building Age",value:["N/A","After_2000","1990-2000","1960-1990","Before_1960"]},
+          {key:"building_r",alias:"Retrofitted",value:["N/A","Yes","No"]},
+          {key:"building_l",alias:"Storeys",value:["N/A","1","2","3","4","5","6","7","8","9","&gt10"]},
+          {key:"building10",alias:"Structural System",value:["N/A","Non_Engineered_RC_Frame","Engineered_RC_Frame","Load_Bearing_Brick_Wall_in_Cement_Mortar","Load_Bearing_Brick_Wall_in_Mud_Mortar","Load_Bearing_Stone_Wall_in_Cement_Mortar","Load_Bearing_Stone_Wall_in_Mud_Mortar","Adobe","Mixed"]},
+          {key:"building_f",alias:"Floor Material",value:["N/A","Wood","Bamboo","RCC/RBC","Jack_Arch","Others"]},
+          {key:"building_4",alias:"Roof Material",value:["N/A","Jhingati","Clay_Tiles","CGI","RCC/RBC","Others"]},
+          {key:"building_6",alias:"Roof Slope",value:["N/A","Flat","Sloped","Mixed"]},
+          
+          
+          {key:"building_n",alias:"Adjoining Buildings",value:["N/A","One_Side_Same_Height","One_Side_Different_Height","Two_Sides_Same_Height","Two_Sides_Different_Height","Three_Sides_Same_Height","Three_Sides_Different_Height","Free_Standing"]},
+          {key:"building_8",alias:"Building Shape in Plan",value:["N/A","Rectangular","T-Shaped","L-Shaped","U-Shaped","Multi-Projected","Triangular"]},
+          {key:"building_s",alias:"Building Shape in Elevation",value:["N/A","Regular","Setback","Tall"]},
+          {key:"building_c",alias:"Visible Physical Condition",value:["N/A","Poor","Average","Good"]},
+          {key:"building_o",alias:"Overhangs",value:["N/A","Yes","No"]},
+          {key:"building_9",alias:"Soft Storeys",value:["N/A","Yes","No"]},
+          {key:"earthquake",alias:"Earthquake Resistant Elements",value:["N/A","Yes","No","Partial"]}     
+          ];
+
+
+              
  
             function init(){
                 map = new OpenLayers.Map ("map", {
@@ -40,7 +66,7 @@
 				        // alert("map centered");
  
                 //Initialise the vector layer using OpenLayers.Format.Geojson
-                layer1 = new OpenLayers.Layer.Vector("buildingss", {
+                layer1 = new OpenLayers.Layer.Vector("2D Buildings", {
                     strategies: [new OpenLayers.Strategy.Fixed()],
                     protocol: new OpenLayers.Protocol.HTTP({
                         url: "qgis.building.sample.height.geojson",
@@ -1237,7 +1263,67 @@
                 layer2 = new OpenLayers.Layer.Buildings();
                 map.addLayer(layer2);
                 layer2.osmb.geoJSON(qjson);
-                layer2.osmb.setStyle({ color: 'rgb(105,100,100)' ,roofColor:'rgba(155,100,100,0.9)'});
+                layer2.osmb.setStyle({ color: 'rgb(255,100,100)' ,roofColor:'rgba(255,200,100,0.9)'});
+
+
+                //controls   
+                function onFeatureSelect(feature){  
+                  // removepopup();
+                  //tweak
+                  // document.getElementById('instructionline').style.display='none';
+                  selectedfeature = feature;
+                  var name = selectedfeature.attributes['name'];
+                  if(!name){
+                    name = selectedfeature.attributes['operator'];
+                  }
+                  if(!name){
+                    name = '';
+                  }
+                  text = "<h3>"+name+"<form id='formStructuralData'>";
+                  text+="<table>";
+                  
+                  for (var i in field) 
+                  { //lists all fieldibutes
+                              prop = field[i];
+                              val = selectedfeature.attributes[field[i].key];
+                              //alert(prop.key+val);
+                              //alert(val);
+                    text += "<tr><td>"+prop.alias+"</td><td><select id="+prop.key+" style='width: 250px'>";
+                    for (var j in prop.value)
+                    {
+                      if(prop.value[j]==val)
+                      text +="<option selected='selected' value="+prop.value[j]+">"+prop.value[j]+"</option>";
+                      else
+                      text +="<option value="+prop.value[j]+">"+prop.value[j]+"</option>";
+                    }
+                    text+="</select></td></tr>";
+                          }
+                  text +="</table>";
+                  text +="</form>";/*+"<a href='http://geowiki.com/iD/#layer=Bing&map="+19+"/"+selectedfeature.geometry.getCentroid().transform(proj900913,proj4326).y+"/"+selectedfeature.geometry.getCentroid().transform(proj900913,proj4326).x+"'>Edit Geometry with iD (experimental)</a>"*/
+                  
+                  //alert(text);
+                  
+                  popup = new OpenLayers.Popup.FramedCloud(
+                    "chicken",
+                    selectedfeature.geometry.getBounds().getCenterLonLat(),
+                    null,
+                    text,
+                    null,
+                    true,
+                    null
+                    
+                  );
+                  map.addPopup(popup,true);
+                } 
+                selector = new OpenLayers.Control.SelectFeature(layer1,{
+                  onSelect: onFeatureSelect,
+                  // onUnselect: onFeatureUnselect
+                  //,hover: true
+                });
+                map.addControl(selector);
+                
+                selector.activate();
+                
             }
         </script>
     </head>
