@@ -1,8 +1,24 @@
 <html>
     <head>
         <title></title>
-        <script src="http://openlayers.org/api/2.12/OpenLayers.js" type="text/javascript"></script>
+        <style type="text/css">
+          .olControlLoadingPanel {
+              background-image:url(http://dev.openlayers.org/addins/loadingPanel/trunk/theme/default/img/loading.gif);
+              margin-left: 30%;
+              margin-top: 10%;
+              position: absolute;
+              width: 195px;
+              height: 11px;
+              background-position:center;
+              background-repeat:no-repeat;
+              display: none;
+              z-index:15000;
+          }
+        </style>
+        // <script src="http://openlayers.org/api/2.12/OpenLayers.js" type="text/javascript"></script>
+        <script src="../../openlayers-2.12/OpenLayers.debug.js" type="text/javascript"></script>
         <script type="text/javascript" src="javascripts/osmbuildings.debug.v0.1.8.js"></script>
+        <script type="text/javascript" src="javascripts/LoadingPanel.js"></script>
         <script type="text/javascript">
             var lat = 27.67058;
             // var lat=52.49480;
@@ -12,6 +28,8 @@
             var map;
             var layer;
             var geojson_format = new OpenLayers.Format.GeoJSON();
+            var loadingpanel = new OpenLayers.Control.LoadingPanel();
+            var zoom_data_limit= 13,
             proj900913 = new OpenLayers.Projection("EPSG:900913");
             proj4326 = new OpenLayers.Projection("EPSG:4326");
 
@@ -36,15 +54,13 @@
           {key:"earthquake",alias:"Earthquake Resistant Elements",value:["N/A","Yes","No","Partial"]}
           ];
 
-          function setStatusText(text)
-            {
-          var html_node = document.getElementById("statusline");
-          if (html_node != null)
-          {
-                  var div = html_node.firstChild;
-                  div.deleteData(0, div.nodeValue.length);
-                  div.appendData(text);
-          }
+          function setStatusText(text){
+            var html_node = document.getElementById("statusline");
+            if (html_node != null){
+              var div = html_node.firstChild;
+              div.deleteData(0, div.nodeValue.length);
+              div.appendData(text);
+            }
           }
 
           ZoomLimitedBBOXStrategy = OpenLayers.Class(OpenLayers.Strategy.BBOX, {
@@ -66,7 +82,7 @@
                 }
                 else if (mapBounds !== null && ((options && options.force) ||
                                            this.invalidBounds(mapBounds))) {
-                    ++load_counter;
+                    // ++load_counter;
                     setStatusText("Loading data ...");
                     zoom_valid = true;
 
@@ -100,13 +116,15 @@
                 var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 
                 map.setCenter(lonLat, zoom);
+                map.addControl(loadingpanel);
 
                 //webdri building data
                 building_url = "http://overpass-api.de/api/interpreter?data=(way['building'~'kindergarten|school|college|hospital|clinic|nursing_home'](bbox);node(w););out body qt;"; //main working url
                 //var data_url = "Ktm valley 2013-01-01_10-47.osm";
 
                 building = new OpenLayers.Layer.Vector("Building", {
-                    strategies: [ZoomLimitedBBOXStrategy, new OpenLayers.Strategy.Refresh()],
+                    strategies: [new ZoomLimitedBBOXStrategy(16)],
+                    // strategies:[new OpenLayers.Strategy.BBOX()],
                     protocol: new OpenLayers.Protocol.HTTP({
                         url: building_url,
                         //<-- relative or absolute URL to your .osm file
@@ -116,8 +134,8 @@
                     styleMap: new OpenLayers.StyleMap({
                         'default': new OpenLayers.Style({
                             'strokeWidth': 1,
-                            fillColor: "grey",
-                            'title': '${oid}'
+                            fillColor: "transparent",
+                            'title': '${name}'
                         })
                     })
                 });
@@ -129,6 +147,7 @@
                 building.events.on({
                     "featuresadded": function(feature) {
                         // debugger;
+                        // loadingpanel.activate();
                         console.log('feature added');
                         for (i = 0; i < feature.features.length; i++) {
                             if (typeof(feature.features[i].attributes["building:level"])!="number"){
