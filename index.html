@@ -135,7 +135,7 @@
                     projection: new OpenLayers.Projection("EPSG:4326"),
                     styleMap: new OpenLayers.StyleMap({
                         'default': new OpenLayers.Style({
-                            'strokeWidth': 1,
+                            'strokeWidth': 0.1,
                             fillColor: "transparent",
                             'title': '${name}'
                         })
@@ -159,10 +159,11 @@
                             }
 
                             feature.features[i].geometry.transform(proj900913,proj4326);
+                            feature.features[i].attributes["color"] = 'rgb('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+')';
                         }
                         geojson_string = geojson_format.write(building.features);
                         layer2.osmb.geoJSON(JSON.parse(geojson_string));
-                        layer2.osmb.setStyle({ color: 'rgb(0,255,100)',roofColor:'rgb(255,0,0)'});
+                        // layer2.osmb.setStyle({ color: '#ffff72',roofColor:'#ffff72'});
                     }
                 });
 
