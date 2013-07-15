@@ -113,7 +113,7 @@
                     projection: new OpenLayers.Projection("EPSG:4326"),
                     displayProjection: new OpenLayers.Projection("EPSG:4326")
                 });
-                map.addLayer(new OpenLayers.Layer.OSM());
+                map.addLayer(new OpenLayers.Layer.OSM("OSM",null,{attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors (ODbL)"}));
 
                 var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 
@@ -125,7 +125,7 @@
                 //var data_url = "Ktm valley 2013-01-01_10-47.osm";
 
                 building = new OpenLayers.Layer.Vector("Building", {
-                    strategies: [new ZoomLimitedBBOXStrategy(16)],
+                    strategies: [new ZoomLimitedBBOXStrategy(16,{ratio:2})],
                     // strategies:[new OpenLayers.Strategy.BBOX()],
                     protocol: new OpenLayers.Protocol.HTTP({
                         url: building_url,
@@ -162,9 +162,10 @@
                         }
                         geojson_string = geojson_format.write(building.features);
                         layer2.osmb.geoJSON(JSON.parse(geojson_string));
-                        layer2.osmb.setStyle({ color: 'rgb(255,100,100)',roofColor:'rgb(0,0,255)'});
+                        layer2.osmb.setStyle({ color: 'rgb(0,255,100)',roofColor:'rgb(255,0,0)'});
                     }
                 });
+
                 //controls
                 function onFeatureSelect(feature){
                   // removepopup();
