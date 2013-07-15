@@ -34,25 +34,27 @@
             proj4326 = new OpenLayers.Projection("EPSG:4326");
 
             var field = [
-          {key:"building",alias:"Building",value:["N/A","kindergarten","school","college","university","hospital","clinic","nursing_home","health_post"]},
-
-          {key:"building_3",alias:"Owner",value:["N/A","Self","Rent"]},
-
-          {key:"building_a",alias:"Estimated Building Age",value:["N/A","After_2000","1990-2000","1960-1990","Before_1960"]},
-          {key:"building_r",alias:"Retrofitted",value:["N/A","Yes","No"]},
-          {key:"building_l",alias:"Storeys",value:["N/A","1","2","3","4","5","6","7","8","9","&gt10"]},
-          {key:"building10",alias:"Structural System",value:["N/A","Non_Engineered_RC_Frame","Engineered_RC_Frame","Load_Bearing_Brick_Wall_in_Cement_Mortar","Load_Bearing_Brick_Wall_in_Mud_Mortar","Load_Bearing_Stone_Wall_in_Cement_Mortar","Load_Bearing_Stone_Wall_in_Mud_Mortar","Adobe","Mixed"]},
-          {key:"building_f",alias:"Floor Material",value:["N/A","Wood","Bamboo","RCC/RBC","Jack_Arch","Others"]},
-          {key:"building_4",alias:"Roof Material",value:["N/A","Jhingati","Clay_Tiles","CGI","RCC/RBC","Others"]},
-          {key:"building_6",alias:"Roof Slope",value:["N/A","Flat","Sloped","Mixed"]},
-          {key:"building_n",alias:"Adjoining Buildings",value:["N/A","One_Side_Same_Height","One_Side_Different_Height","Two_Sides_Same_Height","Two_Sides_Different_Height","Three_Sides_Same_Height","Three_Sides_Different_Height","Free_Standing"]},
-          {key:"building_8",alias:"Building Shape in Plan",value:["N/A","Rectangular","T-Shaped","L-Shaped","U-Shaped","Multi-Projected","Triangular"]},
-          {key:"building_s",alias:"Building Shape in Elevation",value:["N/A","Regular","Setback","Tall"]},
-          {key:"building_c",alias:"Visible Physical Condition",value:["N/A","Poor","Average","Good"]},
-          {key:"building_o",alias:"Overhangs",value:["N/A","Yes","No"]},
-          {key:"building_9",alias:"Soft Storeys",value:["N/A","Yes","No"]},
-          {key:"earthquake",alias:"Earthquake Resistant Elements",value:["N/A","Yes","No","Partial"]}
-          ];
+              {key:"building",alias:"Building",value:["N/A","kindergarten","school","college","university","hospital","clinic","nursing_home","health_post"]},
+              
+              {key:"building:owner",alias:"Owner",value:["N/A","Self","Rent"]},
+              
+              {key:"building:age",alias:"Estimated Building Age",value:["N/A","After_2000","1990-2000","1960-1990","Before_1960"]},
+              {key:"building:retrofit",alias:"Retrofitted",value:["N/A","Yes","No"]},
+              {key:"building:level",alias:"Storeys",value:["N/A","1","2","3","4","5","6","7","8","9","&gt10"]},
+              {key:"building:structure",alias:"Structural System",value:["N/A","Non_Engineered_RC_Frame","Engineered_RC_Frame","Load_Bearing_Brick_Wall_in_Cement_Mortar","Load_Bearing_Brick_Wall_in_Mud_Mortar","Load_Bearing_Stone_Wall_in_Cement_Mortar","Load_Bearing_Stone_Wall_in_Mud_Mortar","Adobe","Mixed"]},
+              {key:"building:floor_material",alias:"Floor Material",value:["N/A","Wood","Bamboo","RCC/RBC","Jack_Arch","Others"]},
+              {key:"building:roof_material",alias:"Roof Material",value:["N/A","Jhingati","Clay_Tiles","CGI","RCC/RBC","Others"]},
+              {key:"building:roof_slope",alias:"Roof Slope",value:["N/A","Flat","Sloped","Mixed"]},
+              
+              
+              {key:"building:neighbour",alias:"Adjoining Buildings",value:["N/A","One_Side_Same_Height","One_Side_Different_Height","Two_Sides_Same_Height","Two_Sides_Different_Height","Three_Sides_Same_Height","Three_Sides_Different_Height","Free_Standing"]},
+              {key:"building:shape:plan",alias:"Building Shape in Plan",value:["N/A","Rectangular","T-Shaped","L-Shaped","U-Shaped","Multi-Projected","Triangular"]},
+              {key:"building:shape:elevation",alias:"Building Shape in Elevation",value:["N/A","Regular","Setback","Tall"]},
+              {key:"building:condition",alias:"Visible Physical Condition",value:["N/A","Poor","Average","Good"]},
+              {key:"building:overhang",alias:"Overhangs",value:["N/A","Yes","No"]},
+              {key:"building:soft_storey",alias:"Soft Storeys",value:["N/A","Yes","No"]},
+              {key:"earthquake_resistant_element",alias:"Earthquake Resistant Elements",value:["N/A","Yes","No","Partial"]}     
+            ];
 
           function setStatusText(text){
             var html_node = document.getElementById("statusline");
@@ -202,14 +204,14 @@
 
                   popup = new OpenLayers.Popup.FramedCloud(
                     "chicken",
-                    selectedfeature.geometry.getBounds().getCenterLonLat(),
+                    selectedfeature.geometry.getBounds().getCenterLonLat().transform(proj4326,proj900913),
                     null,
                     text,
                     null,
                     true,
                     null
-
                   );
+                  console.log(selectedfeature.geometry.getBounds().getCenterLonLat());
                   map.addPopup(popup,true);
                 }
                 selector = new OpenLayers.Control.SelectFeature(building,{
