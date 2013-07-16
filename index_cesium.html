@@ -19,7 +19,7 @@
         <!-- // <script src="http://openlayers.org/api/2.12/OpenLayers.js" type="text/javascript"></script> -->
         <script src="../../openlayers-2.12/OpenLayers.debug.js" type="text/javascript"></script>
         <script type="text/javascript" src="javascripts/osmbuildings.debug.v0.1.8.js"></script>
-        <script type="text/javascript" src="javascripts/Cesium/Cesium.js"></script>
+        <script type="text/javascript" src="javascripts/Cesium-b18/Cesium/Cesium.js"></script>
         <!-- // <script type="text/javascript" src="javascripts/LoadingPanel.js"></script> -->
         <script type="text/javascript" src="javascripts/zoomlimitedbbox.js"></script>
         <script src="../../openlayers-2.12/addins/spin/spin.js" type="text/javascript"></script>
@@ -84,14 +84,17 @@
                     destination : Cesium.Cartographic.fromDegrees(lon,lat, 100000.0)
                 });
                 scene.getAnimations().add(flight);
-                //end
 
-                //webdri building data
+                var dataSource = new Cesium.GeoJsonDataSource();
+                console.log('datasource',dataSource)
+                //cesium end
+
+                //webdri building data from overpass
                 building_url = "http://overpass-api.de/api/interpreter?data=(way['building'~'kindergarten|school|college|hospital|clinic|nursing_home'](bbox);node(w););out body qt;"; //main working url
                 //var data_url = "Ktm valley 2013-01-01_10-47.osm";
 
                 building = new OpenLayers.Layer.Vector("Building", {
-                    strategies: [new ZoomLimitedBBOXStrategy(16,{ratio:2})],
+                    strategies: [new ZoomLimitedBBOXStrategy(17,{ratio:2})],
                     // strategies:[new OpenLayers.Strategy.BBOX()],
                     protocol: new OpenLayers.Protocol.HTTP({
                         url: building_url,
@@ -130,6 +133,10 @@
                         geojson_string = geojson_format.write(building.features);
                         layer2.osmb.geoJSON(JSON.parse(geojson_string));
                         // layer2.osmb.setStyle({ color: '#ffff72',roofColor:'#ffff72'});
+
+                        //cesium                        
+                        dataSource.load(geojson_string);
+                        
                     }
                 })
 
