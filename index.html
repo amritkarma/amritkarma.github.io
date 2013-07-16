@@ -15,14 +15,14 @@
               z-index:15000;
           }
         </style>
-        // <script src="http://openlayers.org/api/2.12/OpenLayers.js" type="text/javascript"></script>
-        <script src="../../openlayers-2.12/OpenLayers.debug.js" type="text/javascript"></script>
-        <script type="text/javascript" src="javascripts/osmbuildings.debug.v0.1.8.js"></script>
+        <script src="http://openlayers.org/api/2.12/OpenLayers.js" type="text/javascript"></script>
+        <!-- // <script src="../../openlayers-2.12/OpenLayers.debug.js" type="text/javascript"></script> -->
+        <script type="text/javascript" src="javascripts/osmbuildings.debug.v0.1.9.js"></script>
         <script type="text/javascript" src="javascripts/LoadingPanel.js"></script>
         <script type="text/javascript">
-            var lat = 27.67058;
+            var lat = 27.67052;
             // var lat=52.49480;
-            var lon = 85.34019;
+            var lon = 85.33200;
             // var lon=13.42857;
             var zoom=17;
             var map;
@@ -91,6 +91,7 @@
                     this.calculateBounds(mapBounds);
                     this.resolution = this.layer.map.getResolution();
                     this.triggerRead(options);
+                    setStatusText("Loading Complete");
                 }
             },
 
@@ -113,13 +114,30 @@
                     projection: new OpenLayers.Projection("EPSG:4326"),
                     displayProjection: new OpenLayers.Projection("EPSG:4326")
                 });
-                map.addLayer(new OpenLayers.Layer.OSM("OSM",null,{attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors (ODbL)"}));
+                // map.addLayer(new OpenLayers.Layer.OSM("OSM",null,{attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors (ODbL)"}));
 
                 var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 
+                var mapbox = new OpenLayers.Layer.XYZ(
+                    "Natural Earth",
+                    [
+                        "http://a.tiles.mapbox.com/v3/amritkarma.map-6c5zckhu/${z}/${x}/${y}.png",
+                        "http://b.tiles.mapbox.com/v3/amritkarma.map-6c5zckhu/${z}/${x}/${y}.png",
+                        "http://c.tiles.mapbox.com/v3/amritkarma.map-6c5zckhu/${z}/${x}/${y}.png",
+                        "http://d.tiles.mapbox.com/v3/amritkarma.map-6c5zckhu/${z}/${x}/${y}.png"
+                    ], {
+                        attribution: "Tiles &copy; <a href='http://mapbox.com/'>MapBox</a>",
+                        sphericalMercator: true,
+                        wrapDateLine: false,
+                        // numZoomLevels: 5,
+                        isBaseLayer:true
+                    }
+                );
+                map.addLayer(mapbox);
+
                 map.setCenter(lonLat, zoom);
                 map.addControl(loadingpanel);
-
+// http://a.tiles.mapbox.com/v3/amritkarma.map-6c5zckhu/page.html
                 //webdri building data
                 building_url = "http://overpass-api.de/api/interpreter?data=(way['building'~'kindergarten|school|college|hospital|clinic|nursing_home'](bbox);node(w););out body qt;"; //main working url
                 //var data_url = "Ktm valley 2013-01-01_10-47.osm";
@@ -143,9 +161,10 @@
                 });
                 map.addLayer(building);
 
-                layer2 = new OpenLayers.Layer.Buildings();
-                map.addLayer(layer2);
-
+                layer2 = new OSMBuildings(map);//v0.1.9
+                // layer2 = new OpenLayers.Layer.Buildings();//v0.1.8
+                // map.addLayer(layer2);
+                
                 building.events.on({
                     "featuresadded": function(feature) {
                         // debugger;
@@ -159,10 +178,12 @@
                             }
 
                             feature.features[i].geometry.transform(proj900913,proj4326);
-                            feature.features[i].attributes["color"] = 'rgb('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+')';
+                            feature.features[i].attributes["wallColor"] = 'rgba('+Math.floor(Math.random()*155)+','+Math.floor(Math.random()*155)+','+Math.floor(Math.random()*155)+',1)';
+                            feature.features[i].attributes["roofColor"] =feature.features[i].attributes["wallColor"];
                         }
                         geojson_string = geojson_format.write(building.features);
-                        layer2.osmb.geoJSON(JSON.parse(geojson_string));
+                        layer2.setData(JSON.parse(geojson_string));
+                        // layer2.osmb.geoJSON(JSON.parse(geojson_string));
                         // layer2.osmb.setStyle({ color: '#ffff72',roofColor:'#ffff72'});
                     }
                 });
@@ -229,7 +250,8 @@
         </script>
     </head>
     <body onload="init()">
-        <div id="statusline" style="font-size:24pt; font-weight:bold; font-family:sans-serif">No status set yet.</div>
+      <h3>3D Visualisation of Schools, College Buildings in Kathmandu Valley (building height is based on No. of storeys</h3>
+        <div id="statusline" style="font-size:12pt; font-weight:bold; font-family:sans-serif">No status set yet.</div>
         <div id="map" class="smallmap"></div>
         </div>
     </body>
