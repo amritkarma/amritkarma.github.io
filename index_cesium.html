@@ -1,0 +1,144 @@
+<html>
+    <head>
+        <title></title>
+        <!-- <link rel="stylesheet" type="text/css" href="../../openlayers-2.12/addins/spin/Openlayers.Spin.css"></link> -->
+        <!--<style type="text/css">
+          .olControlLoadingPanel {
+              background-image:url(http://dev.openlayers.org/addins/loadingPanel/trunk/theme/default/img/loading.gif);
+              margin-left: 30%;
+              margin-top: 10%;
+              position: absolute;
+              width: 195px;
+              height: 11px;
+              background-position:center;
+              background-repeat:no-repeat;
+              display: none;
+              z-index:15000;
+          }
+        </style>-->
+        <!-- // <script src="http://openlayers.org/api/2.12/OpenLayers.js" type="text/javascript"></script> -->
+        <script src="../../openlayers-2.12/OpenLayers.debug.js" type="text/javascript"></script>
+        <script type="text/javascript" src="javascripts/osmbuildings.debug.v0.1.8.js"></script>
+        <script type="text/javascript" src="javascripts/Cesium/Cesium.js"></script>
+        <!-- // <script type="text/javascript" src="javascripts/LoadingPanel.js"></script> -->
+        <script type="text/javascript" src="javascripts/zoomlimitedbbox.js"></script>
+        <script src="../../openlayers-2.12/addins/spin/spin.js" type="text/javascript"></script>
+        <script src="../../openlayers-2.12/addins/spin/Openlayers.Spin.js" type="text/javascript"></script>
+        <script type="text/javascript">
+          //openlayers variables
+            var lat = 27.67058;
+            // var lat=52.49480;
+            var lon = 85.34019;
+            // var lon=13.42857;
+            var zoom=17;
+            var map;
+            var layer;
+            var geojson_format = new OpenLayers.Format.GeoJSON();
+            geojson_string ='';
+            // var loadingpanel = new OpenLayers.Control.LoadingPanel();
+            var zoom_data_limit= 13,
+            proj900913 = new OpenLayers.Projection("EPSG:900913");
+            proj4326 = new OpenLayers.Projection("EPSG:4326");
+
+            function init(){
+                map = new OpenLayers.Map ("map", {
+                    controls:[
+                        new OpenLayers.Control.Navigation(),
+                        new OpenLayers.Control.PanZoomBar(),
+                        new OpenLayers.Control.LayerSwitcher(),
+                        new OpenLayers.Control.Attribution(),
+                        new OpenLayers.Control.MousePosition()
+                    ],
+                    maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+                    maxResolution: 156543.0399,
+                    numZoomLevels: 19,
+                    units: 'm',
+                    projection: new OpenLayers.Projection("EPSG:4326"),
+                    displayProjection: new OpenLayers.Projection("EPSG:4326")
+                });
+                map.addLayer(new OpenLayers.Layer.OSM("OSM",null,{attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors (ODbL)"}));
+
+                var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+
+                map.setCenter(lonLat, zoom);
+                // map.addControl(loadingpanel);
+                map.addControl(new OpenLayers.Control.Spin());
+
+                //initialize cesium container
+                var widget = new Cesium.CesiumWidget('cesiumContainer');
+                var centralBody = widget.centralBody;
+                var ellipsoid = centralBody.getEllipsoid();
+                var scene = widget.scene;
+                var primitives = scene.getPrimitives();
+                var camera = scene.getCamera();
+                
+                // var terrainProvider = new Cesium.CesiumTerrainProvider({
+                //     url : 'http://cesium.agi.com/smallterrain'
+                // });
+                // centralBody.terrainProvider = terrainProvider;
+
+                //adding openstreetmap layer
+                var layers = widget.centralBody.getImageryLayers();
+                scene.render();
+                var flight = Cesium.CameraFlightPath.createAnimationCartographic(scene.getFrameState(), {
+                    destination : Cesium.Cartographic.fromDegrees(lon,lat, 100000.0)
+                });
+                scene.getAnimations().add(flight);
+                //end
+
+                //webdri building data
+                building_url = "http://overpass-api.de/api/interpreter?data=(way['building'~'kindergarten|school|college|hospital|clinic|nursing_home'](bbox);node(w););out body qt;"; //main working url
+                //var data_url = "Ktm valley 2013-01-01_10-47.osm";
+
+                building = new OpenLayers.Layer.Vector("Building", {
+                    strategies: [new ZoomLimitedBBOXStrategy(16,{ratio:2})],
+                    // strategies:[new OpenLayers.Strategy.BBOX()],
+                    protocol: new OpenLayers.Protocol.HTTP({
+                        url: building_url,
+                        //<-- relative or absolute URL to your .osm file
+                        format: new OpenLayers.Format.OSM()
+                    }),
+                    projection: new OpenLayers.Projection("EPSG:4326"),
+                    styleMap: new OpenLayers.StyleMap({
+                        'default': new OpenLayers.Style({
+                            'strokeWidth': 0.1,
+                            fillColor: "transparent",
+                            'title': '${name}'
+                        })
+                    })
+                });
+                map.addLayer(building);
+
+                layer2 = new OpenLayers.Layer.Buildings();
+                map.addLayer(layer2);
+
+                building.events.on({
+                    "featuresadded": function(feature) {
+                        // debugger;
+                        // loadingpanel.activate();
+                        console.log('feature added');
+                        for (i = 0; i < feature.features.length; i++) {
+                            if (typeof(feature.features[i].attributes["building:level"])!="number"){
+                              feature.features[i].attributes["height"] = 100;
+                                } else {
+                                feature.features[i].attributes["height"] = feature.features[i].attributes["building:level"] * 60;
+                            }
+
+                            feature.features[i].geometry.transform(proj900913,proj4326);
+                            feature.features[i].attributes["color"] = 'rgb('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+')';
+                        }
+                        geojson_string = geojson_format.write(building.features);
+                        layer2.osmb.geoJSON(JSON.parse(geojson_string));
+                        // layer2.osmb.setStyle({ color: '#ffff72',roofColor:'#ffff72'});
+                    }
+                })
+
+            }
+        </script>
+    </head>
+    <body onload="init()">
+        <div id="statusline" style="font-size:24pt; font-weight:bold; font-family:sans-serif">No status set yet.</div>
+        <div id="cesiumContainer" style="height:45%;"></div>
+        <div id="map" class="smallmap" style="height:45%;"></div>
+    </body>
+</html>
