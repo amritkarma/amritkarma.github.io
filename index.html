@@ -1,6 +1,7 @@
 <html>
     <head>
         <title></title>
+        <!-- <link rel="stylesheet" type="text/css" href="../../openlayers-2.12/addins/spin/Openlayers.Spin.css"></link> -->
         <style type="text/css">
           .olControlLoadingPanel {
               background-image:url(http://dev.openlayers.org/addins/loadingPanel/trunk/theme/default/img/loading.gif);
@@ -19,6 +20,8 @@
         <script src="../../openlayers-2.12/OpenLayers.debug.js" type="text/javascript"></script>
         <script type="text/javascript" src="javascripts/osmbuildings.debug.v0.1.8.js"></script>
         <script type="text/javascript" src="javascripts/LoadingPanel.js"></script>
+        <script src="../../openlayers-2.12/addins/spin/spin.js" type="text/javascript"></script>
+        <script src="../../openlayers-2.12/addins/spin/Openlayers.Spin.js" type="text/javascript"></script>
         <script type="text/javascript">
             var lat = 27.67058;
             // var lat=52.49480;
@@ -118,7 +121,8 @@
                 var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 
                 map.setCenter(lonLat, zoom);
-                map.addControl(loadingpanel);
+                // map.addControl(loadingpanel);
+                map.addControl(new OpenLayers.Control.Spin());
 
                 //webdri building data
                 building_url = "http://overpass-api.de/api/interpreter?data=(way['building'~'kindergarten|school|college|hospital|clinic|nursing_home'](bbox);node(w););out body qt;"; //main working url
