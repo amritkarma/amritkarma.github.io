@@ -180,9 +180,11 @@
                             feature.features[i].geometry.transform(proj900913,proj4326);
                             feature.features[i].attributes["wallColor"] = 'rgba('+Math.floor(Math.random()*155)+','+Math.floor(Math.random()*155)+','+Math.floor(Math.random()*155)+',1)';
                             feature.features[i].attributes["roofColor"] =feature.features[i].attributes["wallColor"];
+                            feature.features[i].attributes["shadows"] = false;
                         }
                         geojson_string = geojson_format.write(building.features);
                         layer2.setData(JSON.parse(geojson_string));
+                        layer2.setStyle({shadows:false});
                         // layer2.osmb.geoJSON(JSON.parse(geojson_string));
                         // layer2.osmb.setStyle({ color: '#ffff72',roofColor:'#ffff72'});
                     }
